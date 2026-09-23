@@ -1,1 +1,1262 @@
-Hello World!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="KDDM: Kuramoto Decision Diffusion Models — ICLR 2027 Submission">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KDDM: Kuramoto Decision Diffusion Models</title>
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="KDDM: Kuramoto Decision Diffusion Models">
+  <meta property="og:description" content="Bridging Kuramoto oscillator synchronization with diffusion-based decision making.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="KDDM: Kuramoto Decision Diffusion Models">
+
+  <!-- Fonts: Inter + JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Bulma (layout utilities only) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- OAT custom styles -->
+  <link rel="stylesheet" href="static/css/style.css?v=14">
+
+  <!-- MathJax 3 (SVG output for LaTeX-identical rendering) -->
+  <script>
+    MathJax = {
+      loader: { load: ['input/tex', 'output/svg'] },
+      tex: {
+        inlineMath: [['\\(', '\\)']],
+        displayMath: [['\\[', '\\]']]
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+
+<!-- ============================================================
+     Global Nav (Apple-style black bar)
+     ============================================================ -->
+<nav class="oat-nav" id="oat-navbar">
+  <div class="oat-nav-inner">
+    <a href="#top" class="oat-nav-logo">
+      <i class="fas fa-sync-alt"></i> <span class="kddm">KDDM</span>
+    </a>
+    <ul class="oat-nav-links">
+      <li><a href="#background">Background</a></li>
+      <li><a href="#design">Motivations</a></li>
+      <li><a href="#method">Methodology</a></li>
+      <li><a href="#experiments">Experiments</a></li>
+      <li><a href="#citation">References</a></li>
+    </ul>
+    <button class="oat-nav-toggle" id="oat-mobile-toggle" aria-label="Toggle sidebar">
+      <i class="fas fa-bars"></i>
+    </button>
+  </div>
+</nav>
+
+<!-- ============================================================
+     Blog Layout Wrapper (CSS Grid)
+     ============================================================ -->
+<div class="blog-layout">
+
+<!-- ============================================================
+     TOC Sidebar (frosted glass)
+     ============================================================ -->
+<aside class="oat-toc" id="oat-toc">
+  <div class="oat-toc-title">On this page</div>
+  <nav>
+    <ul class="oat-toc-list">
+      <li><a href="#background" class="toc-section">Background</a></li>
+      <li><a href="#design" class="toc-section">Motivations</a></li>
+      <li><a href="#method" class="toc-section">Methodology</a></li>
+      <li><a href="#experiments" class="toc-section">Experiments</a></li>
+      <li><a href="#exp-synthesizer">&mdash; Synthesizer</a></li>
+      <li><a href="#exp-planner">&mdash; Planner</a></li>
+      <li><a href="#exp-policy">&mdash; Policy</a></li>
+      <li><a href="#exp-robot">&mdash; Deployment</a></li>
+      <li><a href="#citation" class="toc-section">References</a></li>
+    </ul>
+  </nav>
+</aside>
+<div class="oat-toc-overlay" id="oat-toc-overlay"></div>
+
+<!-- ============================================================
+     Article Body
+     ============================================================ -->
+<main class="oat-article">
+
+  <!-- ==========================================================
+       Section 1: Hero
+       ========================================================== -->
+  <section class="blog-hero" id="top">
+    <div class="blog-hero-kicker">ICLR 2027 Submission</div>
+    <h1 class="blog-hero-title">Kuramoto Decision Diffusion Models</h1>
+    <!-- <p class="blog-hero-subtitle">
+      We introduce <span class="kddm">KDDM</span>, a novel framework that bridges the
+      synchronization dynamics of Kuramoto oscillators with diffusion-based decision
+      making, enabling efficient and coordinated sequential decision processes.
+    </p> -->
+
+    <div class="blog-hero-authors">
+      Anonymous authors
+    </div>
+    <p class="blog-hero-affiliation">Paper under review</p>
+
+    <!-- Links -->
+    <!-- <div class="blog-hero-links">
+      <a href="#" class="blog-hero-link link-paper"><i class="fas fa-file-pdf"></i> Paper (OpenReview)</a>
+      <a href="#" class="blog-hero-link"><i class="fab fa-github"></i> Code (Anonymous GitHub)</a>
+    </div> -->
+
+    <!-- TL;DR -->
+    <div class="blog-hero-tldr">
+      <div class="blog-hero-tldr-label">Abstract</div>
+      <p>
+      Diffusion-based decision making has seen explosive popularity due to the ability in producing rich, 
+      multi-modal trajectories. However, existing frameworks erase the structure of robotic data, 
+      which is critical for action fluidity and non-myopic planning, through stochastic noising, 
+      then denoise or recover it only probabilistically. 
+      This paper aims to address the problem of incorporating spatio-temporal dependencies into the diffusion 
+      processes (i.e., forward and reverse), without sacrificing trajectory quality. Building upon and improving 
+      the work of Song et al. <a class="citation-ref" href="#ref1">[1]</a>, we propose <span class="kddm">KDDM</span>, a physics-inspired diffusion paradigm that explicitly
+      encodes the information through Kuramoto-based synchronization. By two neat tricks to harmonize the 
+      intertwined chains of Langevin and Kuramoto dynamics, we prove that <span class="kddm">KDDM</span> elegantly converges to 
+      the desired outcome, and theoretically outperforms prior approaches. Furthermore, we extend <span class="kddm">KDDM</span> 
+      to ODE-accelerated and guided sampling, enabling its integration with today's decision-making ecosystem. 
+      Experimentally, our proposals achieve superior performance in general, across an extensive range of tasks, 
+      including trajectory augmentation, long-horizon planning, and (real-world) robotic control, compared to 
+      various diffusion-based solutions.</p>
+    </div>
+
+    <!-- Overview Figure -->
+    <div class="blog-hero-teaser" style="margin-top:24px">
+        <img src="assets/figs/overview.png" alt="Overview diagram" loading="lazy" style="display:block;width:100%;max-width:none;border-radius:12px">
+        <p class="blog-hero-teaser-caption" style="margin-top:4px"><b>Left:</b> Comparison of diffusion backbones w.r.t. 5 desiderata. 
+          <b>Right:</b> Behavior of different schemes as forward and reverse processes.</p>
+      </div>
+  </section>
+
+  <!-- ==========================================================
+       Section 2: Background Knowledge
+       ========================================================== -->
+  <section class="blog-section" id="background">
+    <div class="blog-section-header">
+      <div class="blog-section-kicker">Background</div>
+      <h2 class="blog-section-title">What is a Kuramoto Model?</h2>
+      <!-- <p class="blog-section-desc">
+        A brief introduction to the mathematical foundation underpinning
+        <span class="kddm">KDDM</span> and the intuition behind synchronization-driven
+        decision making.
+      </p> -->
+    </div>
+
+    <div class="impact-body">
+      <p>
+        The model has its roots in Winfree's 1967 study of coupled biological
+        oscillators <a class="citation-ref" href="#ref2">[2]</a>, which showed
+        numerically that a population with heterogeneous periods synchronises abruptly
+        past a threshold coupling &mdash; a phase transition in the statistical-mechanics
+        sense, but intractable to analyse in full. Kuramoto answered this in 1975
+        <a class="citation-ref" href="#ref3">[3]</a> by replacing Winfree's general
+        coupling with the simplest odd \(2\pi\)-periodic interaction,
+        \(\sin(\theta_j - \theta_i)\), which made the model analytically tractable while
+        preserving the qualitative physics.
+      </p>
+      <p>
+        Consider \(N\) phase oscillators \(\theta_i \in [-\pi, \pi)\), indexed
+        \(i = 1, \ldots, N\), each with a natural frequency \(\omega_i\) drawn
+        independently from a unimodal, symmetric probability density \(g(\omega)\)
+        centred at zero (we always work in the rotating frame of the mean frequency).
+        The Kuramoto model is the system of ODEs
+      </p>
+      <div style="display:flex;align-items:center;gap:12px;margin:10px 0 18px">
+        <div style="flex:1;text-align:center">
+          \[ \frac{d\theta_i}{dt} = \omega_i + \frac{K}{N}\sum_{j=1}^{N}\sin(\theta_j - \theta_i), \qquad i = 1, \ldots, N. \]
+        </div>
+        <div style="color:var(--oat-muted)">(1)</div>
+      </div>
+      <p>
+        The parameter \(K \geq 0\) is the global coupling strength, and the factor
+        \(1/N\) normalises the interaction so that the dynamics remain well-defined as
+        \(N \to \infty\); the coupling is all-to-all, so every oscillator influences
+        every other equally. The \(\sin\) term is the unique odd \(2\pi\)-periodic
+        function that vanishes when two oscillators are in phase, is maximally
+        attracting at a quarter-period offset, and repels when they are exactly
+        anti-phase. Any smooth odd coupling can be Fourier-expanded, and the \(\sin\)
+        term dominates near the transition.
+      </p>
+
+      <!-- Expandable: mean-field reduction (after the second paragraph of Background) -->
+      <details class="theory-expand property">
+        <summary>
+          <div class="theory-expand-row">
+            <span class="card-badge">Property</span>
+            <span class="theory-expand-title">Mean-Field Reduction</span>
+            <span class="theory-expand-hint">
+              <i class="fas fa-chevron-down" style="font-size:10px"></i> Show explanation
+            </span>
+          </div>
+          <p class="theory-expand-teaser">
+            The \(N\)-body coupling is replaced by a coupling to a single collective
+            field \((r, \psi)\), reducing each oscillator to
+            \(\dot{\theta}_i = \omega_i + Kr\sin(\psi - \theta_i)\).
+          </p>
+        </summary>
+        <div class="theory-expand-body">
+          <p>
+            The key to the model's tractability is the complex order parameter
+            \[ r(t)\,e^{i\psi(t)} \;=\; \frac{1}{N}\sum_{j=1}^{N} e^{i\theta_j(t)}, \]
+            where \(r \in [0,1]\) measures the degree of phase coherence and
+            \(\psi\) is the instantaneous mean phase.
+          </p>
+          <p>
+            Multiplying both sides by \(e^{-i\theta_i}\) and taking the imaginary part
+            gives
+            \[ \frac{1}{N}\sum_{j=1}^{N}\sin(\theta_j - \theta_i) \;=\; r\,\sin(\psi - \theta_i), \]
+            and substituting this back collapses the equation of motion of each
+            oscillator to
+            \[ \frac{d\theta_i}{dt} \;=\; \omega_i + Kr\,\sin(\psi - \theta_i). \]
+          </p>
+          <p>
+            The \(N\)-body coupling is thus replaced by a coupling to the single
+            collective field \((r, \psi)\): each oscillator no longer needs to know
+            what the other \(N-1\) are doing, only the magnitude and direction of the
+            aggregate. Because \(r\) and \(\psi\) are themselves determined
+            self-consistently by the \(\theta_i\), the system is not truly decoupled
+            &mdash; it is a mean-field theory in the same sense as the Weiss theory of
+            ferromagnetism.
+          </p>
+          <p>
+            The order parameter also admits a geometric reading that extends beyond
+            the circle: \(r e^{i\psi}\) is the Fr&eacute;chet mean of the empirical
+            measure \(\mu_N = \frac{1}{N}\sum_{j} \delta_{e^{i\theta_j}}\) on \(S^1\),
+            and the modulus \(r = |R|\) measures its concentration in the sense of the
+            intrinsic variance on the manifold &mdash; precisely the quantity
+            minimised by the Fr&eacute;chet mean. This generalises immediately to
+            oscillators on higher-dimensional spheres and Riemannian manifolds.
+          </p>
+        </div>
+      </details>
+
+      <p>
+        Explore the Kuramoto dynamics interactively below &mdash; adjust the coupling
+        strength \(K\), number of oscillators \(N\), and frequency spread \(\sigma\)
+        to see how synchronization emerges:
+      </p>
+
+      <div class="kuramoto-demo" id="kuramoto-demo">
+        <canvas id="kuramoto-canvas" width="570" height="570"></canvas>
+        <div class="kuramoto-panel">
+          <div class="kuramoto-order">
+            <div class="kuramoto-order-label">Order Parameter \(r\)</div>
+            <div class="kuramoto-order-value" id="kuramoto-rV">0.00</div>
+            <div class="kuramoto-order-bar"><div class="kuramoto-order-fill" id="kuramoto-rB" style="width:0%"></div></div>
+          </div>
+          <label class="kuramoto-slider">\(K\) <span id="kuramoto-kV">1.00</span>
+            <input type="range" id="kuramoto-kS" min="0" max="5" step="0.01" value="1.5">
+          </label>
+          <label class="kuramoto-slider">\(N\) <span id="kuramoto-nV">50</span>
+            <input type="range" id="kuramoto-nS" min="10" max="200" step="1" value="50">
+          </label>
+          <label class="kuramoto-slider">\(\sigma\) <span id="kuramoto-sV">0.00</span>
+            <input type="range" id="kuramoto-sS" min="0" max="2.5" step="0.01" value="0.1">
+          </label>
+          <div class="kuramoto-btns">
+            <button class="kuramoto-btn" id="kuramoto-bP">Pause</button>
+            <button class="kuramoto-btn" id="kuramoto-bR">Reset</button>
+          </div>
+          <div class="kuramoto-hist">
+            <div class="kuramoto-hist-title">Phase Velocity \(d\theta / dt\)</div>
+            <canvas id="kuramoto-hFreq" width="250" height="75"></canvas>
+          </div>
+          <div class="kuramoto-hist">
+            <div class="kuramoto-hist-title">Phase Angles \(\theta\)</div>
+            <canvas id="kuramoto-hPhase" width="250" height="75"></canvas>
+          </div>
+          <button class="kuramoto-btn kuramoto-auto" id="kuramoto-bA">Auto Simulate</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================
+       Section 3: Design Principles
+       ========================================================== -->
+  <section class="blog-section" id="design">
+    <div class="blog-section-header">
+      <div class="blog-section-kicker">Motivations</div>
+      <h2 class="blog-section-title">What should diffusion-based decision making guarantee?</h2>
+      <!-- <p class="blog-section-desc">
+        Modern diffusion planners and synthesizers produce high-quality trajectories,
+        but they often lack explicit guarantees about temporal consistency and
+        coordination across decision steps.
+      </p> -->
+    </div>
+
+    <div class="impact-body">
+      <p>
+        Diffusion models now underpin robotic decision making as planners, policies,
+        and data synthesizers. All three generate the same object &mdash; a chunked
+        trajectory \(\tau = ([s_0, a_0], \ldots, [s_H, a_H])\) conditioned on \(c\)
+        (images, goals, or task descriptors) &mdash; and all three raise the same
+        question: what structural guarantees should a diffusion-based decision process
+        provide?
+      </p>
+
+      <div class="motivation-split">
+        <div class="motivation-split-left">
+          <img src="assets/figs/relationship.png" alt="Relationship diagram" loading="lazy">
+        </div>
+        <div class="motivation-split-right">
+          <div class="embed-card">
+            <span class="embed-card-label"><b>Ground Truth</b></span>
+            <div class="embed-card-iframe-wrap">
+              <iframe src="assets/htmls/gt1.html" title="GT1 visualization" loading="lazy"></iframe>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        The difficulty is that classical diffusion is <em>point-wise</em> : DDPM,
+        DDIM, EDM, DPM-Solver, and Rectified Flow all noise and denoise each
+        state/action independently. But a 7-DoF arm demands both its <strong>spatial
+        relationship</strong> (how the joints collaborate) and its <strong>temporal
+        relationship</strong> (how the motion unfolds over time). Independent noise
+        destroys that structure and leaves global consistency entirely to the network.
+      </p>
+
+      <p>
+        We argue that an effective framework should satisfy three desiderata: (1)
+        temporal coherence &mdash; decisions across time steps should be mutually
+        consistent, not independently generated; (2) efficient coordination &mdash; the
+        generation process should leverage cross-joint information without quadratic
+        scaling; and (3) theoretical grounding &mdash; the dynamics should admit
+        tractable analysis connecting to well-understood physical models.
+      </p>
+
+      <div class="sub-question-callout">
+        For Optimized Decision Making &mdash; Can Kuramoto models be applied here?
+      </div>
+
+      <details class="theory-expand method">
+        <summary>
+          <div class="theory-expand-row">
+            <span class="card-badge">Method</span>
+            <span class="theory-expand-title">Kuramoto Orientation Diffusion Model (KODM)</span>
+            <span class="theory-expand-hint">
+              <i class="fas fa-chevron-down" style="font-size:10px"></i> Show formulation
+            </span>
+          </div>
+          <p class="theory-expand-teaser">
+            A novel diffusion scheme whose forward and reverse SDEs both carry the Kuramoto
+            coupling.
+          </p>
+        </summary>
+        <div class="theory-expand-body">
+          <p>
+            A diffusion model is a pair of SDEs, one forward and one reverse. Because
+            the Kuramoto model admits a similar Markov-chain form, KODM
+            <a class="citation-ref" href="#ref1">[1]</a> intertwines the two through
+            Langevin dynamics. Its forward process couples all points as it noises
+            them,
+            \[ \frac{d\theta^i_t}{dt} = \frac{1}{N}\sum_{j=1}^{N}\kappa_t\sin(\theta^j_t-\theta^i_t) + \kappa^{\mathrm{ref}}_t\sin(\psi_{\mathrm{ref}}-\theta^i_t) + \sigma_t\epsilon^i, \quad \epsilon^i \sim \mathcal{N}(0, I), \]
+            where \(\kappa_t\) is the time-varying coupling strength,
+            \(\kappa^{\mathrm{ref}}_t\) the reference-phase coupling strength, and
+            \(\sigma_t\) the noise level; phases are wrapped as
+            \(\theta_t = (\theta_t + \pi)\bmod 2\pi - \pi\).
+          </p>
+          <p>
+            Sampling \(\theta_T\) from a von Mises distribution under quasi-equilibrium
+            yields the time-reversed SDE
+            \[ \frac{d\theta^i_t}{dt} = \frac{1}{N}\sum_{j=1}^{N}\kappa_t\sin(\theta^j_t-\theta^i_t) + \kappa^{\mathrm{ref}}_t\sin(\psi_{\mathrm{ref}}-\theta^i_t) - \sigma_t^2\frac{\partial}{\partial\theta^i_t}\log p(\theta_t) + \sigma_t\bar{\epsilon}^i, \]
+            so the same Kuramoto interaction that shapes the forward process also guides
+            the reverse one, alongside a score term that has to be learned.
+          </p>
+          <p>
+            Since the marginal \(p(\theta_t)\) has no closed form, KODM is trained by
+            Local Score Matching (LSM),
+            \[ \mathbb{E}_{\theta_0}\mathbb{E}_{t\sim U[0,T]}\mathbb{E}_{\theta_{t-1}\sim p(\theta_{t-1}|\theta_0)}\mathbb{E}_{\theta_t\sim p(\theta_t|\theta_{t-1})}\Big[\sigma_t^2\big\|s(\theta_t,t)-\nabla\log p(\theta_t|\theta_{t-1})\big\|_2^2\Big], \]
+            which asks the network \(s(\theta_t, t)\) to match the score of the one-step
+            transition \(p(\theta_t \mid \theta_{t-1})\).
+          </p>
+        </div>
+      </details>
+
+      <p>
+        KODM moves in exactly this direction: by synchronizing and desynchronizing all
+        points jointly, it lets local patterns reinforce one another before noise erodes
+        them. Off-the-shelf, however, it is <strong>unsuited to decision-making</strong>
+        &mdash; its forward process costs \(\mathcal{O}(T)\) per pass with no
+        acceleration, and its sub-optimal score-matching objective yields unreal or
+        failed trajectories. The dilemma is thus to keep its dependency-capturing power without surrendering the
+        tractability of conventional diffusion, since any interaction between points
+        prevents convergence to a stationary distribution.
+      </p>
+
+      <div class="blog-hero-teaser" style="margin:28px 0">
+      <!-- aspect-ratio + object-fit crop the GIF's built-in white margin above the diagram -->
+      <img src="assets/gifs/rationale.gif?nocache=3" alt="Overview of KDDM framework" style="display:block;width:100%;max-width:none;border-radius:12px;aspect-ratio:2700/988;object-fit:cover;object-position:center bottom">
+      <!-- <p class="blog-hero-teaser-caption" style="margin-top:4px"><b>Overview of the Kuramoto diffusion framework:</b> Kuramoto synchronization drives the diffusion decision process.</p> -->
+      </div>
+
+      <p>
+        But our answer is yes: recasting the denoising process through Kuramoto
+        oscillators, <span class="kddm">KDDM</span> <strong>satisfies all three
+        desiderata without trade-offs</strong>, which we will get to later.
+        <!-- The remainder of this page unfolds how -->
+        <!-- <span class="kddm">KDDM</span> instantiates these principles in practice. -->
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ==========================================================
+       Section 4: Method
+       ========================================================== -->
+  <section class="blog-section" id="method">
+    <div class="blog-section-header">
+      <div class="blog-section-kicker">Methodology</div>
+      <h2 class="blog-section-title">Kuramoto Decision Diffusion Model</h2>
+      <!-- <p class="blog-section-desc">
+        <span class="kddm">KDDM</span> builds the synchronization through
+        &ldquo;telescoping&rdquo; &mdash; a hierarchical coupling mechanism that
+        coordinates diffusion across the decision horizon.
+      </p> -->
+    </div>
+
+    <div class="impact-body">
+      <!-- <p>
+        The obstacle is the non-linear drift in the Kuramoto diffusion SDEs. It rules
+        out an explicit one-step mapping \(\theta_0 \to \theta_t\) of the familiar
+        form \(x_t = \sqrt{\bar\alpha_t}x_0 + \sqrt{1-\bar\alpha_t}\epsilon\), and with
+        it any closed-form score. Interleaving the coupling with noise injection is a
+        lose-lose arrangement: the coupling destroys the linear-Gaussian structure that
+        makes diffusion tractable, while the noise destabilizes the synchronization
+        inherited from \(\theta_0\). 
+      </p> -->
+
+      <figure class="method-figure">
+        <img src="assets/figs/framework.png" alt="Overview of the KDDM framework: synchronization, training, and desynchronization" loading="lazy">
+        <figcaption class="method-figure-caption"><b>Overview of <span class="kddm">KDDM</span>.</b> Synchronization, training, and desynchronization. The coupling is injected as a transient drift, so the forward marginals stay Gaussian in closed form.</figcaption>
+      </figure>
+
+      <h3 class="method-subhead">1. Two tweaks to the Kuramoto dynamics</h3>
+      <p>
+        The first tweak is <strong>self-synchronization</strong>, which makes the drift
+        a function of the clean trajectory alone. Rather than treating the coupling
+        among the oscillators in \(\theta_t\) as an attractor, KDDM couples only the
+        noiseless trajectory: by the mean-field reduction, the coupling at time \(t\) is
+      </p>
+      \[ K_\psi(\theta_0, t) := r(t)\sin\!\big(\psi(t) - \theta_0(t)\big),
+         \qquad \theta_0(t) = \theta_0(t-1) + K_\psi(\theta_0, t-1), \]
+      <p>
+        and the reference-phase term \(\psi_{\mathrm{ref}}\) is dropped. Once
+        \(\theta_0\) is specified, \(K_\psi(\theta_0,t)\) is uniquely determined for
+        every \(t\): it is <em>predictable</em>, and therefore learnable.
+      </p>
+      <p>
+        Interactions nevertheless accumulate through
+        \(\sum_{i=1}^{t}K_\psi(\theta_0,i)\), which keeps the two chains overlapped.
+        The second tweak, the <strong>telescoping update</strong>, defines a
+        variance-preserving transition kernel that clears the accumulated coupling as
+        each new one arrives:
+      </p>
+      \[ q_\psi(\theta_t \mid \theta_{t-1}, \theta_0) =
+         \mathcal{N}\!\Big(\sqrt{\alpha_t}\,\theta_{t-1} + \kappa_t K_\psi(\theta_0,t)
+         - \sqrt{\alpha_t}\,\kappa_{t-1}K_\psi(\theta_0,t-1),\ \beta_t I\Big). \]
+      <p>
+        The picture is a broken zipper pulled from top to bottom: the two sides stay
+        apart above and below the slider and are joined only at its position. Each step
+        thus adds a transient drift that is explicitly biased by the spatio-temporal
+        dependency, without disturbing the structure we need. Unrolling the kernel
+        telescopes the accumulated coupling away and merges the noise, leaving a
+        closed-form marginal
+      </p>
+      \[ q_\psi(\theta_t \mid \theta_0) =
+         \mathcal{N}\!\Big(\sqrt{\bar\alpha_t}\,\theta_0 + \kappa_t K_\psi(\theta_0,t),\
+         (1-\bar\alpha_t)I\Big), \]
+
+      <!-- <details class="theory-expand">
+        <summary>
+          <div class="theory-expand-row">
+            <span class="card-badge">Proof</span>
+            <span class="theory-expand-title">Why the marginal is closed-form</span>
+            <span class="theory-expand-hint">
+              <i class="fas fa-chevron-down" style="font-size:10px"></i> Show the idea
+            </span>
+          </div>
+          <p class="theory-expand-teaser">
+            Unrolling the kernel cancels the accumulated coupling term by term, leaving
+            only the coupling of the current step.
+          </p>
+        </summary>
+        <div class="theory-expand-body">
+          <p>
+            Apply the reparameterization trick to the transition kernel one step at a
+            time. A single step reads
+            \(\theta_t = \sqrt{\alpha_t}\,\theta_{t-1} + \kappa_t K_\psi(\theta_0,t) -
+            \sqrt{\alpha_t}\,\kappa_{t-1}K_\psi(\theta_0,t-1) + \sqrt{1-\alpha_t}\,\epsilon_{t-1}\).
+          </p>
+          <p>
+            Substituting \(\theta_{t-1}\) and repeating, the terms pair off: the
+            \(-\sqrt{\alpha_t}\,\kappa_{t-1}K_\psi(\theta_0,t-1)\) contributed by step
+            \(t\) cancels the \(+\sqrt{\alpha_t}\,\kappa_{t-1}K_\psi(\theta_0,t-1)\) that
+            emerges from expanding \(\sqrt{\alpha_t}\,\theta_{t-1}\). After \(t\) steps
+            the accumulated couplings have cancelled completely and only the current one
+            survives, \(\theta_t = \sqrt{\alpha_t\cdots\alpha_1}\,\theta_0 +
+            \kappa_t K_\psi(\theta_0,t) + \sqrt{1-\alpha_t\cdots\alpha_1}\,\bar\epsilon\).
+            This is exactly what the telescoping update is for.
+          </p>
+          <p>
+            The noise terms merge because independent Gaussians add in variance: for
+            example \(\sqrt{(1-\alpha_t) + \alpha_t(1-\alpha_{t-1})} =
+            \sqrt{1-\alpha_t\alpha_{t-1}}\). Writing \(\bar\alpha_t = \prod_{i\le t}\alpha_i\)
+            gives the stated marginal.
+          </p>
+        </div>
+      </details> -->
+
+      <p>
+        Because \(K_\psi(\theta_0,T) \to 0\) for large \(T\), the stationary law
+        simplifies to the isotropic Gaussian \(\mathcal{N}(0,I)\). Bayes' rule then
+        gives a Gaussian reverse &mdash; desynchronization &mdash; kernel as well:
+      </p>
+      \[ q_\psi(\theta_{t-1} \mid \theta_t, \theta_0) =
+         \mathcal{N}\!\big(\tilde\mu(\theta_t, \theta_0),\ \tilde\Sigma_t I\big),
+         \qquad \tilde\Sigma_t = \frac{(1-\bar\alpha_{t-1})\beta_t}{1-\bar\alpha_t}, \]
+      \[ \tilde\mu(\theta_t,\theta_0) =
+         \frac{\sqrt{\alpha_t}(1-\bar\alpha_{t-1})}{1-\bar\alpha_t}
+         \big(\theta_t - \kappa_t K_\psi(\theta_0,t)\big)
+         + \kappa_{t-1}K_\psi(\theta_0,t-1)
+         + \frac{\sqrt{\bar\alpha_{t-1}}\beta_t}{1-\bar\alpha_t}\theta_0. \]
+
+      <!-- <details class="theory-expand">
+        <summary>
+          <div class="theory-expand-row">
+            <span class="card-badge">Proof</span>
+            <span class="theory-expand-title">Where the reverse kernel comes from</span>
+            <span class="theory-expand-hint">
+              <i class="fas fa-chevron-down" style="font-size:10px"></i> Show the idea
+            </span>
+          </div>
+          <p class="theory-expand-teaser">
+            Conditioned on the clean trajectory every distribution is Gaussian, so
+            Bayes' rule plus completing the square gives the kernel in closed form.
+          </p>
+        </summary>
+        <div class="theory-expand-body">
+          <p>
+            Condition on \(\theta_0\), so that all three distributions involved are
+            Gaussian. Bayes' rule gives \(q_\psi(\theta_{t-1}\mid\theta_t,\theta_0)
+            \propto q_\psi(\theta_t\mid\theta_{t-1},\theta_0)\,
+            q_\psi(\theta_{t-1}\mid\theta_0)\); the denominator
+            \(q_\psi(\theta_t\mid\theta_0)\) does not depend on \(\theta_{t-1}\) and
+            therefore only contributes a normalizing constant.
+          </p>
+          <p>
+            Writing out the two exponentials, the first contributes
+            \(-\|\theta_t - \sqrt{\alpha_t}\,\theta_{t-1} - c_t\|_2^2 / 2\beta_t\) with
+            \(c_t = \kappa_t K_\psi(\theta_0,t) - \sqrt{\alpha_t}\,\kappa_{t-1}K_\psi(\theta_0,t-1)\),
+            and the second contributes
+            \(-\|\theta_{t-1} - \sqrt{\bar\alpha_{t-1}}\,\theta_0 - \kappa_{t-1}K_\psi(\theta_0,t-1)\|_2^2 / 2(1-\bar\alpha_{t-1})\).
+          </p>
+          <p>
+            Collecting terms in \(\theta_{t-1}\), the quadratic coefficient is
+            \(\alpha_t/\beta_t + 1/(1-\bar\alpha_{t-1})\). Inverting it with
+            \(\beta_t = 1-\alpha_t\) gives the variance \(\tilde\Sigma_t\), and
+            completing the square gives the mean \(\tilde\mu\) &mdash; Theorem 1.
+          </p>
+        </div>
+      </details> -->
+
+      <h3 class="method-subhead">2. Training and sampling</h3>
+      <p>
+        <span class="kddm">KDDM</span> is parameterized by a trainable reconstructor
+        \(\hat\theta_0\) that recovers the clean chunk from \(\theta_t\) at every step;
+        any common backbone can be used, such as a 1D temporal CNN or a Time-Series
+        Diffusion Transformer. Maximizing the usual evidence lower bound reduces to a
+        weighted reconstruction bound,
+      </p>
+      \[ -\mathrm{ELBO} \le C + \sum_{t=1}^{T}\mathbb{E}_{\theta_0,\epsilon}
+         \Big[\,k_t\big\|\theta_0 -
+         \hat\theta_0\big(\sqrt{\bar\alpha_t}\theta_0 + \kappa_tK_\psi(\theta_0,t)
+         + \sqrt{1-\bar\alpha_t}\,\epsilon,\ t\big)\big\|_2^2\,\Big], \]
+      <p>
+        and in practice to the unweighted objective
+        \(\mathcal{L}_{\mathrm{simple}} = \sum_{t=1}^{T}\mathbb{E}_{(\theta_0,\theta_t)}
+        \|\theta_0 - \hat\theta_0(\theta_t, t)\|_2^2\) &mdash; an ordinary denoising
+        regression. Sampling alternates the mean update above with Gaussian noise of
+        variance \(\sigma_t\).
+      </p>
+
+      <!-- <details class="theory-expand">
+        <summary>
+          <div class="theory-expand-row">
+            <span class="card-badge">Proof</span>
+            <span class="theory-expand-title">How the bound becomes a denoising loss</span>
+            <span class="theory-expand-hint">
+              <i class="fas fa-chevron-down" style="font-size:10px"></i> Show the idea
+            </span>
+          </div>
+          <p class="theory-expand-teaser">
+            The ELBO splits into divergences that are constant or proportional to the
+            reconstruction error, so all that is left is a weighted regression.
+          </p>
+        </summary>
+        <div class="theory-expand-body">
+          <p>
+            Expand the ELBO into the prior divergence, one divergence per reverse step,
+            and the final reconstruction term. The prior term is constant: since
+            \(K_\psi(\theta_0,T) \to 0\), the forward marginal at \(T\) is the standard
+            Gaussian, so that divergence does not depend on the model.
+          </p>
+          <p>
+            Each reverse divergence is taken between two Gaussians that share the same
+            covariance \(\tilde\Sigma_t I\), so it collapses to
+            \(\tfrac{1}{2\tilde\Sigma_t}\|\tilde\mu - \hat\mu\|_2^2\). Comparing
+            \(\tilde\mu\) with the model's \(\hat\mu\), the only dependence on
+            \(\theta_{t-1}\) cancels, and what remains is a difference in
+            \(\theta_0\) and in the couplings \(K_\psi(\theta_0,\cdot)\) versus
+            \(K_\psi(\hat\theta_0,\cdot)\).
+          </p>
+          <p>
+            Because \(K_\psi\) is Lipschitz in its argument,
+            \(\|K_\psi(\theta_0,t) - K_\psi(\hat\theta_0,t)\|_2^2 \le
+            \rho_t\|\theta_0 - \hat\theta_0\|_2^2\) (Lemma 6), so every remaining term is
+            bounded by the reconstruction error with timestep-dependent coefficients
+            \(k_t\). This yields the weighted bound above; dropping the weights gives
+            \(\mathcal{L}_{\mathrm{simple}}\) &mdash; Theorem 2.
+          </p>
+        </div>
+      </details> -->
+
+      <figure class="method-figure">
+        <img src="assets/figs/algorithm.png" alt="Training and sampling algorithms of KDDM" loading="lazy">
+        <!-- <figcaption class="method-figure-caption"><b>Training and sampling.</b> The forward pass forms \(\theta_t\) in a single step from Eq. (5); the model is then trained by regressing the clean chunk, and sampling runs the reverse kernel.</figcaption> -->
+      </figure>
+
+      <h3 class="method-subhead">3. Some optimizations</h3>
+
+      <h4 class="method-subsubhead">3.1 DDIM-style ODE</h4>
+      <p>
+        Because the marginals are closed-form, the ancestral step can be replaced by a
+        non-Markovian one, yielding <span class="kddm">KDIM</span> &mdash; an implicit
+        ODE sampler with the same marginals and training objective:
+      </p>
+      \[ \theta_{t-\Delta t} = \sqrt{\bar\alpha_{t-\Delta t}}\,\hat\theta_0 + \hat K_{t-\Delta t}
+         + \sqrt{1-\bar\alpha_{t-\Delta t}-\sigma_t^2}\cdot
+         \frac{\theta_t - \sqrt{\bar\alpha_t}\,\hat\theta_0 - \hat K_t}{\sqrt{1-\bar\alpha_t}}
+         + \sigma_t\epsilon_t, \]
+      <p>
+        where \(\Delta t\) is the number of skipped steps and \(\hat K_t\) abbreviates
+        \(\kappa_t K_\psi(\hat\theta_0,t)\). At \(\sigma_t = 0\) the sampler is
+        deterministic, mapping noise back to data in a single sweep.
+      </p>
+
+      <h4 class="method-subsubhead">3.2 Guided sampling</h4>
+      <p>
+        The reverse process also accepts conditioning. A pretrained time-conditional
+        classifier steers it, or unifying the conditional and unconditional models gives
+        classifier-free guidance. Training-free alternatives avoid a classifier
+        altogether: replacement re-noises the known oscillators for inpainting,
+        posterior sampling guides through a cheap metric on the Tweedie posterior mean,
+        and sequential Monte Carlo re-weights and resamples particles, needing no
+        task-specific guidance strength and converging to the true posterior as the
+        particle count grows.
+      </p>
+
+      <h4 class="method-subsubhead">3.3 Learned coupling</h4>
+      <p>
+        The coupling terms \(\{K_\psi(\theta_0,t)\}_{t=1}^{T}\) need not be unrolled: a
+        time-conditional network predicts them from \((\theta_0,t)\), cutting each
+        self-synchronization from \(\mathcal{O}(t)\) to \(\mathcal{O}(1)\) after a
+        supervised pre-training &mdash; which lets the forward pass form \(\theta_t\) in
+        a single step.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ==========================================================
+       Section 5: Experimental Validation
+       ========================================================== -->
+  <section class="blog-section" id="experiments">
+    <div class="blog-section-header">
+      <div class="blog-section-kicker">Experimental Validation</div>
+      <h2 class="blog-section-title"><span class="kddm">KDDM</span> enables improvement of diffusion-based synthesizer/planner/policy</h2>
+      <!-- <p class="blog-section-desc">
+        We evaluate <span class="kddm">KDDM</span> across four settings spanning
+        simulation benchmarks and real-world robot deployment. 
+      </p> -->
+    </div>
+
+    <!-- 5.1 Synthesizer -->
+    <div class="exp-subsection" id="exp-synthesizer">
+      <h3 class="exp-subsection-title">1. Generate trajectories as data synthesizer</h3>
+      <p class="exp-subsection-desc">
+        We evaluate <span class="kddm">KDDM</span> as a trajectory synthesizer on
+        standard transition datasets (Hopper, Walker, HalfCheetah, Ant, and Adroit Hand),
+        comparing against KODM and other diffusion paradigms.
+      </p>
+      <!-- <p style="font-size:15px;color:var(--oat-ink);line-height:1.5">
+        <strong>Setup:</strong> [Describe the experimental setup here: datasets,
+        environment variants, evaluation metrics, baseline methods, and hyperparameters.
+        Include details about the Kuramoto coupling strength \(K\), telescoping levels,
+        and diffusion steps.]
+      </p> -->
+      <div class="exp-video-grid">
+        <figure class="exp-video-item">
+          <video autoplay muted loop playsinline controls>
+            <source src="assets/videos/kuramoto_diffusion_hopper.mp4" type="video/mp4">
+          </video>
+          <!-- <figcaption></figcaption> -->
+        </figure>
+        <figure class="exp-video-item">
+          <video autoplay muted loop playsinline controls>
+            <source src="assets/videos/kuramoto_diffusion_walker2d.mp4" type="video/mp4">
+          </video>
+          <!-- <figcaption></figcaption> -->
+        </figure>
+        <figure class="exp-video-item">
+          <video autoplay muted loop playsinline controls>
+            <source src="assets/videos/kuramoto_diffusion_halfcheetah.mp4" type="video/mp4">
+          </video>
+          <!-- <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">Generative process of <span class="kddm">KDDM</span> as denoising and desynchronization.</p> -->
+          <!-- <figcaption class="exp-video-caption">Generative process of <span class="kddm">KDDM</span> as denoising and desynchronization</figcaption> -->
+          <p class="blog-hero-teaser-caption" style="margin-top:4px">Generative process of <span class="kddm">KDDM</span> as denoising and desynchronization</p>
+        </figure>
+        <div class="uncgen-results-table" style="margin-top:24px; text-align:center;">
+        <img src="assets/figs/uncond_gen.png" alt="Uncond. numerical results" style="max-width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,.08);" loading="lazy">
+            <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">Generated data quality (smoothness & realness) comparison across datasets and DMs.</p>
+        </div>
+        <div class="cgen-results-table" style="margin-top:24px; text-align:center;">
+        <img src="assets/figs/cond_gen.png" alt="Cond. numerical results" style="max-width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,.08);" loading="lazy">
+            <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">Comparison of the weighted errors for conditional generation task (generative trajectory stitching).</p>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--oat-muted);line-height:1.5;margin-top:20px">
+        <strong>The takeaway:</strong> <span class="kddm">KDDM</span> produces smoother and more realistic trajectories over other DMs, 
+        which improves NACF and NCC by up to 15.6% and 12.7%, respectively, compared with the best-performing baseline. Moreover, our proposed 
+        guided sampling schemes for <span class="kddm">KDDM</span> is also effective.
+      </p>
+    </div>
+
+    <!-- 5.2 Planner -->
+    <div class="exp-subsection" id="exp-planner">
+      <h3 class="exp-subsection-title">2. Generate decision sequences as planner.</h3>
+      <p class="exp-subsection-desc">
+        We extend <span class="kddm">KDDM</span> to long and short horizon planning tasks
+        requiring coordinated multi-step reasoning, including robot locomotion (Gym-MuJoCo), 
+        maze navigation (Maze) and robot manipulation (Franka Kitchen).
+      </p>
+      <!-- <p style="font-size:15px;color:var(--oat-ink);line-height:1.5">
+        <strong>Setup:</strong> [Describe the planning-specific setup: task descriptions,
+        horizon lengths, evaluation metrics (success rate, plan optimality, planning
+        time), and how <span class="kddm">KDDM</span> adapts the telescoping mechanism
+        for longer horizons.]
+      </p> -->
+      <div class="planner-results-table" style="margin-top:24px; text-align:center;">
+        <img src="assets/figs/planning_results.png" alt="Planning1 numerical results" style="max-width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,.08);" loading="lazy">
+        <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">Offline planning performance comparison across D4RL <a class="citation-ref" href="#ref4">[4]</a>  environments and diffusion-based RL algorithms.</p>
+      </div>
+      <div class="diffuser-table" style="margin-top:24px; text-align:center;">
+        <img src="assets/figs/diffuser_ablation.png" alt="Planning2 numerical results" style="max-width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,.08);" loading="lazy">
+        <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">Comparing diffusion-based planning with <span class="kddm">KDDM</span> (red) against the original (blue) diffuser <a class="citation-ref" href="#ref5">[5]</a>.</p>
+      </div>
+      <div class="planner-compare">
+        <div class="planner-compare-box">
+          <div class="planner-compare-label">Diffuser + Baseline</div>
+          <div class="planner-compare-grid">
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Hopper</div>
+              <img src="assets/gifs/hopper_diffuser.gif" alt="Hopper Diffuser" loading="lazy">
+            </div>
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Walker2d</div>
+              <img src="assets/gifs/walker_diffuser.gif" alt="Walker Diffuser" loading="lazy">
+            </div>
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Maze2D</div>
+              <img src="assets/gifs/maze_diffuser.gif" alt="Maze Diffuser" loading="lazy">
+            </div>
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Kuka Stacking</div>
+              <img src="assets/gifs/kuka_stacking_diffuser.gif" alt="Kuka Stacking Diffuser" loading="lazy">
+            </div>
+          </div>
+        </div>
+        <div class="planner-compare-box">
+          <div class="planner-compare-label">Diffuser + <span class="kddm">KDDM</span></div>
+          <div class="planner-compare-grid">
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Hopper</div>
+              <img src="assets/gifs/hopper_kddm.gif" alt="Hopper KDDM" loading="lazy">
+            </div>
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Walker2d</div>
+              <img src="assets/gifs/walker_kddm.gif" alt="Walker KDDM" loading="lazy">
+            </div>
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Maze2D</div>
+              <img src="assets/gifs/maze_kddm.gif" alt="Maze KDDM" loading="lazy">
+            </div>
+            <div class="planner-compare-item">
+              <div class="planner-compare-env">Kuka Stacking</div>
+              <img src="assets/gifs/kuka_stacking_kddm.gif" alt="Kuka Stacking KDDM" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--oat-muted);line-height:1.5;margin-top:20px">
+        <strong>The takeaway:</strong> Introducing the Kuramoto model does make a better diffusion-based planner in offline RL. 
+        across all tasks (22 in total), our <span class="kddm">KDDM</span> and <span class="kddm">KDIM</span> lead all planners 
+        with 13 and 9 near-optimal results respectively.
+      </p>
+    </div>
+
+    <!-- 5.3 Policy -->
+    <div class="exp-subsection" id="exp-policy">
+      <h3 class="exp-subsection-title">3. Generate actions as multimodal policy.</h3>
+      <p class="exp-subsection-desc">
+        We evaluate <span class="kddm">KDDM</span> as a policy parameterization for
+        model-based and model-free reinforcement learning, comparing against
+        diffusion policy baselines.
+      </p>
+      <!-- <p style="font-size:15px;color:var(--oat-ink);line-height:1.5">
+        <strong>Setup:</strong> [Describe the policy learning setup: RL algorithms used,
+        environment details, how <span class="kddm">KDDM</span> integrates with the
+        policy gradient or actor-critic framework, and any modifications to the
+        denoising network for online decision making.]
+      </p> -->
+      <div class="dpbc-table" style="margin-top:24px; text-align:center;">
+        <img src="assets/figs/policy_state_results.png" alt="Policy1 numerical results" style="max-width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,.08);" loading="lazy">
+        <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">Success rate for state-based tasks with different diffusion-based control policies.</p>
+      </div>
+      <div class="dbc-table" style="margin-top:24px; text-align:center;">
+        <img src="assets/figs/policy_img_results.png" alt="Policy2 numerical results" style="max-width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,.08);" loading="lazy">
+        <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">Success rate for image-based tasks with the Diffusion Behavior Cloning.</p>
+      </div>
+
+      <!-- Imitation learning qualitative comparison -->
+      <div class="il-compare">
+        <div class="il-compare-head">
+          <div class="il-compare-label">Diffusion Policy <a class="citation-ref" href="#ref6">[6]</a> + Baseline <span class="il-compare-side">(left)</span></div>
+          <div class="il-compare-label kddm-label">Diffusion Policy + <span class="kddm">KDDM</span> <span class="il-compare-side">(right)</span></div>
+        </div>
+
+        <div class="il-compare-group">
+          <div class="il-compare-pair" style="--l:1fr;--r:3fr">
+            <div class="il-compare-videos" style="--c:1">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/kitchen/1.mp4" type="video/mp4"></video>
+            </div>
+            <div class="il-compare-videos" style="--c:3">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/kitchen/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/kitchen/2.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/kitchen/3.mp4" type="video/mp4"></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="il-compare-group">
+          <div class="il-compare-pair" style="--l:1fr;--r:2fr">
+            <div class="il-compare-videos" style="--c:3">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/pusht/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/pusht/2.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/pusht/3.mp4" type="video/mp4"></video>
+            </div>
+            <div class="il-compare-videos" style="--c:6">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/pusht/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/pusht/2.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/pusht/3.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/pusht/4.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/pusht/5.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/pusht/6.mp4" type="video/mp4"></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="il-compare-group">
+          <div class="il-compare-pair" style="--l:1fr;--r:2fr">
+            <div class="il-compare-videos" style="--c:2">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/square/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/square/2.mp4" type="video/mp4"></video>
+            </div>
+            <div class="il-compare-videos" style="--c:4">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/square/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/square/2.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/square/3.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/square/4.mp4" type="video/mp4"></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="il-compare-group">
+          <div class="il-compare-pair" style="--l:1fr;--r:2fr">
+            <div class="il-compare-videos" style="--c:2">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/tool_hang/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/tool_hang/2.mp4" type="video/mp4"></video>
+            </div>
+            <div class="il-compare-videos" style="--c:4">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/tool_hang/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/tool_hang/2.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/tool_hang/3.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/tool_hang/4.mp4" type="video/mp4"></video>
+            </div>
+          </div>
+        </div>
+
+        <div class="il-compare-group">
+          <div class="il-compare-pair" style="--l:1fr;--r:2fr">
+            <div class="il-compare-videos" style="--c:2">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/transport/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/baseline/transport/2.mp4" type="video/mp4"></video>
+            </div>
+            <div class="il-compare-videos" style="--c:4">
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/transport/1.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/transport/2.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/transport/3.mp4" type="video/mp4"></video>
+              <video autoplay muted loop playsinline controls><source src="assets/videos/IL/kddm/transport/4.mp4" type="video/mp4"></video>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p style="font-size:14px;color:var(--oat-muted);line-height:1.5;margin-top:14px">
+        <strong>The takeaway:</strong> <span class="kddm">KDDM</span> is able to learn effective (multi-modal) robotic control from human demonstrations.
+        We see that the improvements brought by our proposed DM is pervasive (approximately 90% of the best-performing results). Further, our approach remains 
+        effective in visual scenarios, as it requires no modifications to the underlying architecture while retaining its advantages in general.
+      </p>
+    </div>
+
+    <!-- 5.4 Robot Deployment -->
+    <div class="exp-subsection" id="exp-robot">
+      <h3 class="exp-subsection-title">4. Real-world robot deployment</h3>
+      <p class="exp-subsection-desc">
+        We deploy <span class="kddm">KDDM</span>-backboned policies on a physical robot manipulation
+        platform to validate its real-world applicability. 
+      </p>
+      <p style="font-size:15px;color:var(--oat-ink);line-height:1.5">
+        <strong>Setup:</strong> Our robot manipulation experiments use the open-source SO-10xARM platform developed by RobotStudio 
+        in collaboration with Hugging Face. The SO-101 (SO-10X) features six joints and three cameras, and is fully compatible with 
+        the open-source LeRobot <a class="citation-ref" href="#ref7">[7]</a> framework.
+      </p>
+      <div class="setup" style="margin-top:24px; text-align:center;">
+        <img src="assets/figs/setup.png" alt="Policy1 numerical results" style="max-width:100%; border-radius:8px; box-shadow:0 2px 12px rgba(0,0,0,.08);" loading="lazy">
+        <!-- <p style="font-size:13px;color:var(--oat-muted);margin-top:8px;">state-based .</p> -->
+      </div>
+      <div class="real-compare">
+        <div class="real-compare-box">
+          <div class="real-compare-label">Diffusion Policy <span class="il-compare-side">(original)</span></div>
+          <video autoplay muted loop playsinline controls><source src="assets/videos/real/duck_baseline.mp4" type="video/mp4"></video>
+        </div>
+        <div class="real-compare-box">
+          <div class="real-compare-label">Diffusion Policy + <span class="kddm">KDDM</span></div>
+          <video autoplay muted loop playsinline controls><source src="assets/videos/real/duck_ours.mp4" type="video/mp4"></video>
+        </div>
+      </div>
+      <div class="real-video-grid">
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/drink1.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/drink2.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/drink3.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/egg1.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/egg2.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/egg3.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/egg4.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/fork1.mp4" type="video/mp4"></video>
+        <video autoplay muted loop playsinline controls><source src="assets/videos/real/fork2.mp4" type="video/mp4"></video>
+      </div>
+      <p style="font-size:14px;color:var(--oat-muted);line-height:1.5;margin-top:14px">
+        <strong>The takeaway:</strong> <span class="kddm">KDDM</span> can enable real-world robot deployment on diffusion policies. It makes diffusion policies
+        noticeably reasonable and more consistent on real-world manipulation tasks &mdash; with no extra smoothing or task-specific tuning.
+      </p>
+    </div>
+
+  </section>
+
+  <!-- ==========================================================
+       Section 6: Citation
+       ========================================================== -->
+  <section class="blog-section" id="citation">
+    <div class="blog-section-header">
+      <h2 class="blog-section-title">References</h2>
+    </div>
+
+    <ol class="reference-list">
+      <li id="ref1"><span class="ref-tag">[1]</span>
+        Y. Song, A. Keller, S. Brodjian, T. Miyato, Y. Yue, P. Perona, and M. Welling, "Kuramoto orientation diffusion models," in <em>Advances in Neural Information Processing Systems</em>, 2026, pp. 4047&ndash;4076.
+      </li>
+      <li id="ref2"><span class="ref-tag">[2]</span>
+        A. T. Winfree, "Biological rhythms and the behavior of populations of coupled oscillators," <em>Journal of Theoretical Biology</em>, vol. 16, no. 1, pp. 15&ndash;42, 1967.
+      </li>
+      <li id="ref3"><span class="ref-tag">[3]</span>
+        Y. Kuramoto, "Self-entrainment of a population of coupled non-linear oscillators," in <em>International Symposium on Mathematical Problems in Theoretical Physics</em>, ser. Lecture Notes in Physics, vol. 39, Berlin: Springer, 1975, pp. 420&ndash;422.
+      </li>
+      <li id="ref4"><span class="ref-tag">[4]</span>
+        J. Fu, A. Kumar, O. Nachum, G. Tucker, and S. Levine, "D4rl: Datasets for deep data-driven reinforcement learning," <em>arXiv preprint arXiv:2004.07219</em>, 2020.
+      </li>
+      <li id="ref5"><span class="ref-tag">[5]</span>
+        M. Janner, Y. Du, J. B. Tenenbaum, and S. Levine, "Planning with diffusion for flexible behavior synthesis," in <em>International Conference on Machine Learning</em>, pp. 9902&ndash;9915, PMLR, 2022.
+      </li>
+      <li id="ref6"><span class="ref-tag">[6]</span>
+        C. Chi, S. Feng, Y. Du, Z. Xu, E. Cousineau, B. Burchfiel, and S. Song, "Diffusion policy: Visuomotor policy learning via action diffusion," <em>The International Journal of Robotics Research</em>, 44(10-11):1684&ndash;1704, 2025.
+      </li>
+      <li id="ref7"><span class="ref-tag">[7]</span>
+        R. Cadene, S. Alibert, F. Capuano, M. Aractingi, A. Zouitine, et al., "Lerobot: An open-source library for end-to-end robot learning," in <em>International Conference on Learning Representations</em>, vol. 2026, pp. 122398&ndash;122417, 2026.
+      </li>
+    </ol>
+  </section>
+
+</main>
+
+</div><!-- /blog-layout -->
+
+<!-- ============================================================
+     Footer
+     ============================================================ -->
+<footer class="oat-footer">
+  <div class="oat-footer-inner">
+  <div class="oat-footer-links">
+    <b><span class="kddm">KDDM</span>: Kuramoto Decision Diffusion Models &mdash; ICLR 2027 Submission.</b> &nbsp;
+    <!-- <a href="#"><i class="fas fa-file-pdf"></i> Paper (OpenReview)</a>
+    <a href="#"><i class="fab fa-github"></i> Code (Anonymous GitHub)</a> -->
+  </div>
+  <p> 
+    This website is licensed under a <a href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+    The page template was inspired and adopted from the <a href="https://ordered-action-tokenization.github.io/">OAT project page</a>.
+    You are free to borrow the source code of this <a href="https://github.com/Kuramoto-Decision-Diffusion/Kuramoto-Decision-Diffusion.github.io">Academic Project Page Template</a>, and we just ask that you link back to this page in the footer.
+  </p>
+  </div><!-- /oat-footer-inner -->
+</footer>
+
+<!-- Kuramoto Interactive Demo -->
+<script>
+(function () {
+  'use strict';
+
+  var TRAIL = 40;
+
+  function KuramotoModel(N, s) {
+    this.dt = 0.01;
+    this.reset(N, s);
+  }
+  KuramotoModel.prototype.reset = function (N, s) {
+    this.N = N; this.sigma = s;
+    this.omega = new Float64Array(N);
+    if (s < .001) {
+      for (var i = 0; i < N; i++) this.omega[i] = 0;
+    } else {
+      for (var i = 0; i < N; i++) {
+        var u1 = Math.random() || 1e-10, u2 = Math.random();
+        this.omega[i] = s * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      }
+    }
+    this.theta = new Float64Array(N);
+    for (var i = 0; i < N; i++) this.theta[i] = Math.random() * 2 * Math.PI;
+    this.derivs = new Float64Array(N);
+    this.trails = [];
+    for (var i = 0; i < N; i++) this.trails[i] = [];
+    this.K = 1; this.r = this.computeR();
+  };
+  KuramotoModel.prototype.computeR = function () {
+    var ss = 0, sc = 0;
+    for (var i = 0; i < this.N; i++) { ss += Math.sin(this.theta[i]); sc += Math.cos(this.theta[i]); }
+    return Math.sqrt(ss * ss + sc * sc) / this.N;
+  };
+  KuramotoModel.prototype.meanPhase = function () {
+    var ss = 0, sc = 0;
+    for (var i = 0; i < this.N; i++) { ss += Math.sin(this.theta[i]); sc += Math.cos(this.theta[i]); }
+    return Math.atan2(ss, sc);
+  };
+  KuramotoModel.prototype.deriv = function (t, K) {
+    var N = this.N, d = new Float64Array(N);
+    for (var i = 0; i < N; i++) {
+      var s = 0;
+      for (var j = 0; j < N; j++) s += Math.sin(t[j] - t[i]);
+      d[i] = this.omega[i] + (K / N) * s;
+    }
+    return d;
+  };
+  KuramotoModel.prototype.step = function () {
+    var t = this.theta, dt = this.dt, K = this.K, N = this.N;
+    var k1 = this.deriv(t, K);
+    var t2 = new Float64Array(N); for (var i = 0; i < N; i++) t2[i] = t[i] + .5 * dt * k1[i];
+    var k2 = this.deriv(t2, K);
+    var t3 = new Float64Array(N); for (var i = 0; i < N; i++) t3[i] = t[i] + .5 * dt * k2[i];
+    var k3 = this.deriv(t3, K);
+    var t4 = new Float64Array(N); for (var i = 0; i < N; i++) t4[i] = t[i] + dt * k3[i];
+    var k4 = this.deriv(t4, K);
+    for (var i = 0; i < N; i++) t[i] += (dt / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]);
+    this.r = this.computeR();
+    for (var i = 0; i < N; i++) { this.trails[i].unshift(t[i]); if (this.trails[i].length > TRAIL) this.trails[i].pop(); }
+    this.derivs = this.deriv(this.theta, this.K);
+  };
+  KuramotoModel.prototype.setK = function (K) { this.K = K; };
+  KuramotoModel.prototype.setSigma = function (s) {
+    this.sigma = s;
+    if (s < .001) { for (var i = 0; i < this.N; i++) this.omega[i] = 0; }
+    else { for (var i = 0; i < this.N; i++) { var u1 = Math.random() || 1e-10, u2 = Math.random(); this.omega[i] = s * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2); } }
+  };
+  KuramotoModel.prototype.setN = function (N) {
+    var oO = this.omega, oT = this.theta, oTr = this.trails;
+    this.N = N; this.omega = new Float64Array(N); this.theta = new Float64Array(N);
+    this.derivs = new Float64Array(N); this.trails = [];
+    for (var i = 0; i < N; i++) {
+      if (i < oO.length) { this.omega[i] = oO[i]; this.theta[i] = oT[i]; this.trails[i] = oTr[i] || []; }
+      else {
+        if (this.sigma < .001) this.omega[i] = 0;
+        else { var u1 = Math.random() || 1e-10, u2 = Math.random(); this.omega[i] = this.sigma * Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2); }
+        this.theta[i] = Math.random() * 2 * Math.PI; this.trails[i] = [];
+      }
+    }
+  };
+
+  var cv = document.getElementById('kuramoto-canvas'),
+      ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height, CX = W / 2, CY = H / 2, R = 210;
+
+  function pc(i, N) { return (i * 360 / N) % 360; }
+
+  function draw(m) {
+    ctx.fillStyle = '#f5f5f7'; ctx.fillRect(0, 0, W, H);
+    // ring ticks
+    for (var i = 0; i < 12; i++) {
+      var a = i / 12 * 2 * Math.PI;
+      var x1 = CX + (R - 8) * Math.cos(a), y1 = CY + (R - 8) * Math.sin(a);
+      var x2 = CX + (R + 7) * Math.cos(a), y2 = CY + (R + 7) * Math.sin(a);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+      ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 1.5; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x2, y2, 2.5, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(0,0,0,.12)'; ctx.fill();
+    }
+    // ring
+    ctx.beginPath(); ctx.arc(CX, CY, R, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(0,0,0,.12)'; ctx.lineWidth = 2; ctx.stroke();
+    // mean phase arrow
+    var r = m.r, N = m.N;
+    if (r > .01) {
+      var mp = m.meanPhase(), mr = r * R * .85;
+      var mx = CX + mr * Math.cos(mp), my = CY + mr * Math.sin(mp);
+      ctx.beginPath(); ctx.moveTo(CX, CY); ctx.lineTo(mx, my);
+      ctx.strokeStyle = 'rgba(0,0,0,.15)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.stroke(); ctx.setLineDash([]);
+      var g = ctx.createRadialGradient(mx, my, 0, mx, my, 16 + r * 12);
+      g.addColorStop(0, 'rgba(0,102,204,.35)'); g.addColorStop(.5, 'rgba(0,102,204,.1)'); g.addColorStop(1, 'rgba(0,102,204,0)');
+      ctx.beginPath(); ctx.arc(mx, my, 16 + r * 12, 0, 2 * Math.PI); ctx.fillStyle = g; ctx.fill();
+      ctx.beginPath(); ctx.arc(mx, my, 7, 0, 2 * Math.PI); ctx.fillStyle = 'rgba(0,102,204,.7)'; ctx.fill();
+    }
+    // trails + particles
+    var bs = Math.max(6, Math.min(15, 32 / Math.sqrt(N)));
+    for (var i = 0; i < N; i++) {
+      var hue = pc(i, N), trail = m.trails[i];
+      if (trail.length > 1) {
+        ctx.beginPath(); ctx.moveTo(CX + R * Math.cos(trail[0]), CY + R * Math.sin(trail[0]));
+        for (var t = 1; t < trail.length; t++) ctx.lineTo(CX + R * Math.cos(trail[t]), CY + R * Math.sin(trail[t]));
+        ctx.strokeStyle = 'hsla(' + hue + ',70%,55%,.3)'; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+      for (var t = 1; t < trail.length; t++) {
+        var tx = CX + R * Math.cos(trail[t]), ty = CY + R * Math.sin(trail[t]);
+        var tr2 = bs * (1 - t / trail.length), alpha = (1 - t / trail.length) * .45;
+        ctx.beginPath(); ctx.arc(tx, ty, Math.max(1, tr2), 0, 2 * Math.PI);
+        ctx.fillStyle = 'hsla(' + hue + ',70%,55%,' + alpha + ')'; ctx.fill();
+      }
+      var th = m.theta[i], x = CX + R * Math.cos(th), y = CY + R * Math.sin(th);
+      var g2 = ctx.createRadialGradient(x, y, bs * .5, x, y, bs * 1.8);
+      g2.addColorStop(0, 'hsla(' + hue + ',70%,55%,.3)');
+      g2.addColorStop(.5, 'hsla(' + hue + ',70%,55%,.1)');
+      g2.addColorStop(1, 'hsla(' + hue + ',70%,55%,0)');
+      ctx.beginPath(); ctx.arc(x, y, bs * 1.8, 0, 2 * Math.PI); ctx.fillStyle = g2; ctx.fill();
+      ctx.beginPath(); ctx.arc(x, y, bs, 0, 2 * Math.PI);
+      ctx.fillStyle = 'hsl(' + hue + ',70%,55%)'; ctx.fill();
+    }
+  }
+
+  var hCv = document.getElementById('kuramoto-hFreq'), hCtx = hCv.getContext('2d');
+  var pCv = document.getElementById('kuramoto-hPhase'), pCtx = pCv.getContext('2d');
+
+  function drawHists(m) {
+    var N = m.N, NB = 24;
+    function hist(canvas, ctxt, values, vMin, vMax) {
+      var cw = canvas.width, ch = canvas.height;
+      ctxt.fillStyle = '#f5f5f7'; ctxt.fillRect(0, 0, cw, ch);
+      var bins = new Array(NB).fill(0);
+      for (var i = 0; i < N; i++) {
+        var idx = Math.floor((values[i] - vMin) / (vMax - vMin) * NB);
+        if (idx >= 0 && idx < NB) bins[idx]++;
+      }
+      var barW = (cw - 4) / NB, maxC = Math.max(1, Math.max.apply(null, bins));
+      for (var i = 0; i < NB; i++) {
+        var barH = bins[i] / maxC * (ch - 15);
+        ctxt.fillStyle = '#0066cc'; ctxt.fillRect(2 + i * barW, ch - 12 - barH, barW - 1, barH);
+      }
+      ctxt.fillStyle = '#6e6e73'; ctxt.font = '8px system-ui'; ctxt.textAlign = 'center';
+      ctxt.fillText(vMin.toFixed(vMin === -6 ? 0 : 2), 10, ch - 1);
+      ctxt.fillText(vMin === 0 ? '0' : vMax === 2 * Math.PI ? '\u03c0' : '0', cw / 2, ch - 1);
+      ctxt.fillText(vMax === 2 * Math.PI ? '2\u03c0' : vMax.toFixed(0), cw - 10, ch - 1);
+    }
+    hist(hCv, hCtx, m.derivs, -6, 6);
+    hist(pCv, pCtx, m.theta, 0, 2 * Math.PI);
+    pCtx.fillStyle = '#6e6e73'; pCtx.font = '8px system-ui'; pCtx.textAlign = 'center';
+    pCtx.fillText('\u03c0', pCv.width / 2, pCv.height - 1);
+  }
+
+  var kS = document.getElementById('kuramoto-kS'), nS = document.getElementById('kuramoto-nS'),
+      sS = document.getElementById('kuramoto-sS');
+  var kV = document.getElementById('kuramoto-kV'), nV = document.getElementById('kuramoto-nV'),
+      sV = document.getElementById('kuramoto-sV');
+  var rV = document.getElementById('kuramoto-rV'), rB = document.getElementById('kuramoto-rB');
+
+  var model = new KuramotoModel(50, 0.1), paused = false, autoMode = true, convergeCount = 0;
+
+  function ui() {
+    kV.textContent = model.K.toFixed(2);
+    nV.textContent = model.N;
+    sV.textContent = model.sigma.toFixed(2);
+    rV.textContent = model.r.toFixed(3);
+    rB.style.width = (model.r * 100).toFixed(1) + '%';
+  }
+
+  function loop() {
+    if (!paused) { for (var s = 0; s < 2; s++) model.step(); }
+    if (autoMode) {
+      if (model.r > .995) convergeCount++; else convergeCount = 0;
+      if (convergeCount > 60) { convergeCount = 0; model.reset(+nS.value, +sS.value); model.setK(+kS.value); nS.value = model.N; sS.value = model.sigma; }
+    }
+    draw(model); drawHists(model); ui();
+    requestAnimationFrame(loop);
+  }
+
+  kS.addEventListener('input', function () { model.setK(+kS.value); });
+  nS.addEventListener('input', function () { model.setN(+nS.value); nS.value = model.N; });
+  sS.addEventListener('input', function () { model.setSigma(+sS.value); sS.value = model.sigma; });
+
+  var bP = document.getElementById('kuramoto-bP');
+  bP.addEventListener('click', function () { paused = !paused; bP.textContent = paused ? 'Continue' : 'Pause'; });
+
+  document.getElementById('kuramoto-bR').addEventListener('click', function () {
+    model.reset(+nS.value, +sS.value); model.setK(+kS.value); nS.value = model.N; sS.value = model.sigma; convergeCount = 0;
+  });
+
+  var bA = document.getElementById('kuramoto-bA');
+  bA.addEventListener('click', function () {
+    autoMode = !autoMode; bA.textContent = autoMode ? 'Auto On' : 'Auto Simulate'; bA.classList.toggle('active', autoMode);
+    if (autoMode) { paused = false; bP.textContent = 'Pause'; convergeCount = 0; }
+  });
+
+  nS.value = model.N; sS.value = model.sigma;
+  model.setK(+kS.value);
+  bA.textContent = 'Auto On'; bA.classList.add('active');
+  ui();
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<!-- Custom JS -->
+<script src="static/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# Local working material — not part of the published site
+/reference/
+/.openclaude/
+/KDDM.pdf
+/demo.html
+/kuramoto.html
+/build_demo.py
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
