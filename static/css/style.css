@@ -617,16 +617,30 @@ img,video{display:block;max-width:100%}
   display:block;
 }
 
-/* Real-robot video grid */
+/* Real-robot video grid: 4x4, one task per row */
 .real-video-grid{
   display:grid;
-  grid-template-columns:repeat(3,1fr);
+  grid-template-columns:repeat(4,1fr);
   gap:10px;
   margin-top:20px;
 }
 .real-video-grid video{
   width:100%;border-radius:var(--radius-img);
   display:block;
+}
+.real-video-task{
+  grid-column:1 / -1;
+  display:flex;align-items:center;gap:10px;
+  font-size:14px;font-weight:600;color:var(--oat-ink);
+  margin:14px 0 2px;
+  padding-bottom:6px;
+  border-bottom:1px solid var(--oat-line);
+}
+.real-video-task::before{
+  content:"";
+  width:4px;height:14px;border-radius:2px;
+  background:var(--oat-accent);
+  flex:none;
 }
 
 /* Experiment video grid */
@@ -862,6 +876,7 @@ mjx-container{overflow-x:auto;overflow-y:hidden}
   .planner-compare{grid-template-columns:1fr}
   .il-compare-pair{grid-template-columns:1fr;gap:12px}
   .real-compare{grid-template-columns:1fr}
+  .real-video-grid{grid-template-columns:repeat(2,1fr)}
   .il-compare-videos + .il-compare-videos{
     border-left:0;padding-left:0;
     border-top:2px solid var(--oat-line);padding-top:12px;
