@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
   <!-- OAT custom styles -->
-  <link rel="stylesheet" href="static/css/style.css?v=17">
+  <link rel="stylesheet" href="static/css/style.css?v=27">
 
   <!-- MathJax 3 (SVG output for LaTeX-identical rendering) -->
   <script>
@@ -334,13 +334,32 @@
       </p>
 
       <p>
-        We argue that an effective framework should satisfy three desiderata: (1)
-        temporal coherence &mdash; decisions across time steps should be mutually
-        consistent, not independently generated; (2) efficient coordination &mdash; the
-        generation process should leverage cross-joint information without quadratic
-        scaling; and (3) theoretical grounding &mdash; the dynamics should admit
-        tractable analysis connecting to well-understood physical models.
+        We argue that an effective framework should satisfy three desiderata:
       </p>
+
+      <div class="desiderata-list" aria-label="Three desiderata for an effective framework">
+        <div>
+          <span>1 &middot; Temporal coherence</span>
+          <div>
+            <strong>Keep decisions coherent across time.</strong>
+            <p>A trajectory is only valid as a whole: the action at one step depends on the steps around it. Classical diffusion denoises each step independently, so agreement between neighbours must be rediscovered. The framework should model the joint distribution over the horizon, keeping adjacent decisions consistent.</p>
+          </div>
+        </div>
+        <div>
+          <span>2 &middot; Spatial coordination</span>
+          <div>
+            <strong>Exploit coupling among features cheaply.</strong>
+            <p>The quantities to generate arrive in groups of coupled features that must stay coordinated &mdash; the joints of an arm, the drones of a swarm. Pairwise reasoning over these features costs quadratically in their number, so the framework should capture the coupling at roughly linear cost.</p>
+          </div>
+        </div>
+        <div>
+          <span>3 &middot; Theoretical grounding</span>
+          <div>
+            <strong>Generate trajectories that succeed.</strong>
+            <p>What matters is whether the generated trajectories accomplish the task, not how well the model fits the data. A statistically faithful model can still sample trajectories that fail, so the framework should concentrate its mass on realistic ones that complete the task.</p>
+          </div>
+        </div>
+      </div>
 
       <div class="sub-question-callout">
         For Optimized Decision Making &mdash; Can Kuramoto models be applied here?
@@ -414,6 +433,21 @@
         <!-- The remainder of this page unfolds how -->
         <!-- <span class="kddm">KDDM</span> instantiates these principles in practice. -->
       </p>
+
+      <div class="compare-approach">
+        <div class="compare-tabs" role="tablist" aria-label="Comparison of diffusion-based decision making approaches">
+          <button type="button" role="tab" id="compare-tab-classical" class="compare-tab is-active" data-compare-target="classical" aria-controls="compare-panel" aria-selected="true">Classical Diffusion</button>
+          <button type="button" role="tab" id="compare-tab-kuramoto" class="compare-tab" data-compare-target="kuramoto" aria-controls="compare-panel" aria-selected="false" tabindex="-1">Kuramoto Diffusion</button>
+          <button type="button" role="tab" id="compare-tab-kddm" class="compare-tab" data-compare-target="kddm" aria-controls="compare-panel" aria-selected="false" tabindex="-1">Ours (<span class="kddm">KDDM</span>)</button>
+        </div>
+        <div class="compare-grid" id="compare-panel" role="tabpanel" aria-labelledby="compare-tab-classical" aria-live="polite">
+          <div><span>Spatial Relationship</span><strong data-compare-label="spatial">No</strong></div>
+          <div><span>Temporal Relationship</span><strong data-compare-label="temporal">No</strong></div>
+          <div><span>Training Effectiveness</span><strong data-compare-label="training">Yes</strong></div>
+          <div><span>Inference Acceleration</span><strong data-compare-label="acceleration">Yes</strong></div>
+          <div><span>Inference Guidance</span><strong data-compare-label="guidance">Yes</strong></div>
+        </div>
+      </div>
     </div>
 
   </section>
@@ -681,6 +715,39 @@
         supervised pre-training &mdash; which lets the forward pass form \(\theta_t\) in
         a single step.
       </p>
+
+      <h3 class="method-conclude-head">Putting Them Together</h3>
+
+      <div class="step-list" aria-label="The KDDM pipeline, end to end">
+        <div>
+          <span>Step 1</span>
+          <div>
+            <strong>Pre-train the coupling terms.</strong>
+            <p>A time-conditional dependency network is supervised to predict \(K_t\) from \((\theta_0, t)\), replacing each \(\mathcal{O}(t)\) self-synchronization with a single \(\mathcal{O}(1)\) lookup.</p>
+          </div>
+        </div>
+        <div>
+          <span>Step 2</span>
+          <div>
+            <strong>Synchronize (forward) the trajectory.</strong>
+            <p>The forward procedure couples every point as it is noised and forms each training tuple \(\theta_t\) in one step, producing the data the rest of the pipeline consumes.</p>
+          </div>
+        </div>
+        <div>
+          <span>Step 3</span>
+          <div>
+            <strong>Learn a model-agnostic reconstructor.</strong>
+            <p>Training fits \((\theta_t, t) \mapsto \hat\theta_0\) from the simple objective, so the reverse dynamics are learned rather than prescribed and any underlying backbone can be used.</p>
+          </div>
+        </div>
+        <div>
+          <span>Step 4</span>
+          <div>
+            <strong>Desynchronize (reverse) at decision time.</strong>
+            <p>At decision-making time the reverse procedure generates the required trajectories with the ancestral SDE, the deterministic ODE, or the guided samplers of &sect;3.2.</p>
+          </div>
+        </div>
+      </div>
     </div>
 
   </section>
@@ -1268,6 +1335,6 @@
 </script>
 
 <!-- Custom JS -->
-<script src="static/js/main.js"></script>
+<script src="static/js/main.js?v=22"></script>
 </body>
 </html>

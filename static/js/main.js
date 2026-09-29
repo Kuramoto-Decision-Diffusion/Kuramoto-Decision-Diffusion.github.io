@@ -227,5 +227,70 @@
     MathJax.typesetPromise().catch(function () {});
   }
 
+  /* ============================================================
+     Approach comparison — method tabs
+     ============================================================ */
+  var compareTabs = document.querySelectorAll('.compare-tab[data-compare-target]');
+
+  if (compareTabs.length) {
+    var compareData = {
+      classical: { spatial: 'No',  temporal: 'No',  training: 'Yes', acceleration: 'Yes', guidance: 'Yes' },
+      kuramoto:  { spatial: 'Yes', temporal: 'Yes', training: 'No',  acceleration: 'No',  guidance: 'No'  },
+      kddm:      { spatial: 'Yes', temporal: 'Yes', training: 'Yes', acceleration: 'Yes', guidance: 'Yes' }
+    };
+
+    var compareLabels = {};
+    ['spatial', 'temporal', 'training', 'acceleration', 'guidance'].forEach(function (key) {
+      compareLabels[key] = document.querySelector('.compare-grid [data-compare-label="' + key + '"]');
+    });
+
+    var comparePanel = document.getElementById('compare-panel');
+
+    function activateCompare(key) {
+      var selected = compareData[key] || compareData.classical;
+
+      compareTabs.forEach(function (tab) {
+        var isActive = tab.getAttribute('data-compare-target') === key;
+        tab.classList.toggle('is-active', isActive);
+        tab.setAttribute('aria-selected', String(isActive));
+        tab.tabIndex = isActive ? 0 : -1;
+        if (isActive && comparePanel && tab.id) {
+          comparePanel.setAttribute('aria-labelledby', tab.id);
+        }
+      });
+
+      Object.keys(compareLabels).forEach(function (metric) {
+        var el = compareLabels[metric];
+        if (el && selected[metric]) el.textContent = selected[metric];
+      });
+    }
+
+    var compareTabList = Array.prototype.slice.call(compareTabs);
+
+    compareTabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        activateCompare(tab.getAttribute('data-compare-target'));
+      });
+
+      tab.addEventListener('keydown', function (event) {
+        var i    = compareTabList.indexOf(tab);
+        var last = compareTabList.length - 1;
+        var next = i;
+
+        if (event.key === 'ArrowRight')      next = (i === last) ? 0 : i + 1;
+        else if (event.key === 'ArrowLeft')  next = (i === 0) ? last : i - 1;
+        else if (event.key === 'Home')       next = 0;
+        else if (event.key === 'End')        next = last;
+        else return;
+
+        event.preventDefault();
+        compareTabList[next].focus();
+        activateCompare(compareTabList[next].getAttribute('data-compare-target'));
+      });
+    });
+
+    activateCompare('classical');
+  }
+
   console.log('OAT paper showcase ready.');
 })();
